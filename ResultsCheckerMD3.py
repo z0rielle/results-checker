@@ -20,7 +20,7 @@ Make a single .exe: run BuildExeMD3.bat on a Windows PC.
 import datetime
 import json
 
-__version__ = "1.3.0"
+__version__ = "1.3.1"
 
 # --- OTA update -------------------------------------------------------
 # How friends get updates without redownloading from you:

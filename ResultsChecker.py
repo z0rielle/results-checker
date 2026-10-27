@@ -204,7 +204,9 @@ def parse_ortu(page):
 
 
 def parse_telegram(page, source):
-    """Telegram /s/ preview page, same mapping/filtering as the checker."""
+    """Telegram /s/ preview page. Ortu markets get their ortu name via
+    the mapping; any other title is kept under its own name, so no
+    Telegram market is dropped from the app."""
     if not page:
         return []
     blocks = re.findall(r"tgme_widget_message_text[^>]*>(.*?)</div>", page, re.S)
@@ -248,8 +250,13 @@ def parse_telegram(page, source):
             norm = ALIASES[title]
         elif title in ORTU_BASES:
             norm = title
-        if not norm:
-            continue  # not one of the ortu markets - filtered out
+        else:
+            # The Windows app shows every market Telegram posts, not
+            # just the ortu-registered ones - a title with no ortu
+            # mapping is shown under its own Telegram title instead
+            # of being dropped. (The checker alerts stay ortu-only;
+            # this is the app only.)
+            norm = title
         rows.append({"market": norm, "result": result,
                      "source": source, "date": date})
     seen, out = set(), []
