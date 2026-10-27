@@ -263,7 +263,11 @@ def parse_telegram(page, source):
 
 def load_results():
     """Return (display_rows, status_text). display_rows are dicts with
-    market / result / info columns, newest Telegram primaries first."""
+    market / result / info columns, newest Telegram primaries first.
+    Telegram's /s/ preview page lists posts oldest first, so the parsed
+    Telegram rows are reversed here - without that, 'latest first'
+    sorting kept the oldest Telegram post on top whenever two rows
+    shared the same timestamp (which on first run was all of them)."""
     # Fetch all three sources in parallel too, so a slow/blocked
     # Telegram channel cannot delay the ortu rows behind it.
     from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -296,6 +300,8 @@ def load_results():
         base = row["market"].rsplit(" - ", 1)[0].strip().upper()
         ortu_by_base.setdefault(base, row)
 
+    # Newest Telegram post first: the preview page itself is oldest first.
+    mbak, king = list(reversed(mbak)), list(reversed(king))
     display, seen = [], set()
     for tg in mbak + king:
         key = tg["market"] + "|" + tg["result"]

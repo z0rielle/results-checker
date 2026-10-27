@@ -20,7 +20,7 @@ Make a single .exe: run BuildExeMD3.bat on a Windows PC.
 import datetime
 import json
 
-__version__ = "1.2.0"
+__version__ = "1.3.0"
 
 # --- OTA update -------------------------------------------------------
 # How friends get updates without redownloading from you:
@@ -161,7 +161,7 @@ def compute_results():
         return {"rows": [], "status": "Error fetching: %s" % exc}
     try:
         history = load_history()
-        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         for row in rows:
             base = base_market(row["market"])
             old = history.get(base) or {}
