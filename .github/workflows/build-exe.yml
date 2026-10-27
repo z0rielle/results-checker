@@ -1,0 +1,45 @@
+name: Build Windows exe
+
+# Runs on every push to main that changes the app. Builds the exe on a
+# real Windows runner (no local Windows build needed) and publishes it
+# as a release asset, so the app's OTA can download it via exe_url.
+# The release tag is the version in version.json, e.g. v1.3.0.
+# Release creation uses the built-in GITHUB_TOKEN, no secrets needed.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ResultsChecker.py"
+      - "ResultsCheckerMD3.py"
+      - "version.json"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: python -m pip install pyinstaller pywebview truststore
+      - name: Read version
+        id: version
+        shell: pwsh
+        run: |
+          $v = (Get-Content version.json | ConvertFrom-Json).version
+          "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+      - name: Build exe
+        run: python -m PyInstaller --onefile --windowed --name ResultsCheckerMD3 --hidden-import truststore --add-data "ResultsChecker.py;." ResultsCheckerMD3.py
+      - name: Publish release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ steps.version.outputs.version }}
+          name: Results Checker ${{ steps.version.outputs.version }}
+          files: dist/ResultsCheckerMD3.exe
+          fail_on_unmatched_files: true
